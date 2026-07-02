@@ -123,6 +123,10 @@ function Passaro(alturaJogo) {
         e.preventDefault()
         voando = false
     }
+    window.ontouchcancel = e => {
+        e.preventDefault()
+        voando = false
+    }
 
     window.onmousedown = e => voando = true
     window.onmouseup = e => voando = false
