@@ -115,6 +115,18 @@ function Passaro(alturaJogo) {
     window.onkeydown = e => voando = true
     window.onkeyup = e => voando = false
 
+    window.ontouchstart = e => {
+        e.preventDefault()
+        voando = true
+    }
+    window.ontouchend = e => {
+        e.preventDefault()
+        voando = false
+    }
+
+    window.onmousedown = e => voando = true
+    window.onmouseup = e => voando = false
+
     this.animar = () => {
         const novoY = this.getY() + (voando ? 8 : -5)
         const alturaMaxima = alturaJogo - this.elemento.clientHeight
