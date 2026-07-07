@@ -250,12 +250,38 @@ function colidiu(passaro, barreiras){
 
 
 
+function ajustarEscala(areaDoJogo, largura, altura) {
+    const container = areaDoJogo.parentElement
+    const titulo = document.querySelector('h1')
+    const rodape = document.querySelector('footer')
+
+    // padding do body (15+15) + margin-bottom do h1 (15) + margin-top do footer (15)
+    const folgaVertical = 60
+    const folgaHorizontal = 30
+
+    const alturaRodape = rodape ? rodape.getBoundingClientRect().height : 0
+    const larguraDisponivel = window.innerWidth - folgaHorizontal
+    const alturaDisponivel = window.innerHeight - titulo.getBoundingClientRect().height - alturaRodape - folgaVertical
+
+    const escala = Math.min(1, larguraDisponivel / largura, alturaDisponivel / altura)
+
+    areaDoJogo.style.transform = `scale(${escala})`
+    container.style.width = `${areaDoJogo.offsetWidth * escala}px`
+    container.style.height = `${areaDoJogo.offsetHeight * escala}px`
+}
+
 function FlappyBird() {
     let pontos = 0
 
     const areaDoJogo = document.querySelector('[wm-flappy]')
     const altura = areaDoJogo.clientHeight
     const largura = areaDoJogo.clientWidth
+
+    ajustarEscala(areaDoJogo, largura, altura)
+    window.onresize = () => ajustarEscala(areaDoJogo, largura, altura)
+    if (document.fonts) {
+        document.fonts.ready.then(() => ajustarEscala(areaDoJogo, largura, altura))
+    }
 
     const progresso = new Progresso()
     const barreiras = new Barreiras(altura, largura, 300, 400,
