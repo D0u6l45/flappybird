@@ -64,6 +64,7 @@ function ParDeBarreiras(altura, abertura, x) {
     this.elemento.appendChild(this.superior.elemento)
     this.elemento.appendChild(this.inferior.elemento)
 
+    let posX = x
 
     this.sortearAbertura = () => {
         const alturaSuperior = Math.random() * (altura - abertura)
@@ -72,8 +73,11 @@ function ParDeBarreiras(altura, abertura, x) {
         this.inferior.setAltura(alturaInferior)
     }
 
-    this.getX = () => parseInt(this.elemento.style.left.split('px')[0])
-    this.setX = x => this.elemento.style.left = `${x}px`
+    this.getX = () => posX
+    this.setX = novaX => {
+        posX = novaX
+        this.elemento.style.left = `${posX}px`
+    }
     this.getLargura = () => this.elemento.clientWidth
 
     this.sortearAbertura()
@@ -113,15 +117,19 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
 }
 
 
-function Passaro(alturaJogo, areaDoJogo) {
+function Passaro(alturaJogo, areaDoJogo, escala = 1) {
     let voando = false
+    let posY = alturaJogo / 2
 
     this.elemento = novoElemento('img', 'passaro')
     this.elemento.src = 'imgs/passaro.png'
 
-    this.getY = () => parseInt(this.elemento.style.bottom.split('px')[0])
+    this.getY = () => posY
 
-    this.setY = y => this.elemento.style.bottom = `${y}px`
+    this.setY = y => {
+        posY = y
+        this.elemento.style.bottom = `${posY}px`
+    }
 
     const ativar = e => {
         if (e.type === 'keydown' && e.code !== 'Space') return
@@ -153,7 +161,7 @@ function Passaro(alturaJogo, areaDoJogo) {
     }
 
     this.animar = () => {
-        const novoY = this.getY() + (voando ? 8 : -5)
+        const novoY = this.getY() + (voando ? 8 : -5) * escala
         const alturaMaxima = alturaJogo - this.elemento.clientHeight
 
         if (voando) this.elemento.className = "passaro-voando"
@@ -172,28 +180,28 @@ function Passaro(alturaJogo, areaDoJogo) {
 }
 
 
-function Progresso() {
+function Progresso(escala = 1) {
     this.elemento = novoElemento('span', 'progresso')
     const desloc = new Barreiras()
     this.atualizarPonto = pontos => {
         this.elemento.innerHTML = pontos
         if (pontos === 0) {
-            desloc.setDesloc(5)
+            desloc.setDesloc(5 * escala)
         }
         else if (pontos === 10) {
-            desloc.setDesloc(7)
+            desloc.setDesloc(7 * escala)
         }
         else if (pontos === 15) {
-            desloc.setDesloc(9)
+            desloc.setDesloc(9 * escala)
         }
         else if (pontos === 30) {
-            desloc.setDesloc(9)
+            desloc.setDesloc(9 * escala)
         }
         else if (pontos === 35) {
-            desloc.setDesloc(10)
+            desloc.setDesloc(10 * escala)
         }
         else if (pontos === 40) {
-            desloc.setDesloc(13)
+            desloc.setDesloc(13 * escala)
         }
     }
 
@@ -237,16 +245,21 @@ function FlappyBird() {
     const areaDoJogo = document.querySelector('[wm-flappy]')
     const altura = areaDoJogo.clientHeight
     const largura = areaDoJogo.clientWidth
+    // 1200x700 é o tabuleiro de referência; em telas menores tudo (velocidade,
+    // gravidade, abertura dos canos) escala junto para manter a jogabilidade
+    const escala = largura / 1200
 
-    const progresso = new Progresso()
+    const progresso = new Progresso(escala)
     const recorde = novoElemento('span', 'recorde')
     recorde.innerHTML = `Recorde: ${lerRecorde()}`
 
-    const barreiras = new Barreiras(altura, largura, 300, 400, () => {
+    const abertura = 300 * escala
+    const espaco = 400 * escala
+    const barreiras = new Barreiras(altura, largura, abertura, espaco, () => {
         progresso.atualizarPonto(++pontos)
         AudioMotor.pontuar()
     })
-    const passaro = new Passaro(altura, areaDoJogo)
+    const passaro = new Passaro(altura, areaDoJogo, escala)
 
     areaDoJogo.appendChild(progresso.elemento)
     areaDoJogo.appendChild(recorde)
