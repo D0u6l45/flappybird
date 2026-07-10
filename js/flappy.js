@@ -102,7 +102,7 @@ function Barreiras(altura, largura, abertura, espaco, notificarPonto) {
 }
 
 
-function Passaro(alturaJogo) {
+function Passaro(alturaJogo, areaDoJogo) {
     let voando = false
 
     this.elemento = novoElemento('img', 'passaro')
@@ -112,8 +112,33 @@ function Passaro(alturaJogo) {
 
     this.setY = y => this.elemento.style.bottom = `${y}px`
 
-    window.onkeydown = e => voando = true
-    window.onkeyup = e => voando = false
+    const ativar = e => {
+        if (e.type === 'keydown' && e.code !== 'Space') return
+        e.preventDefault()
+        voando = true
+    }
+    const desativar = e => {
+        if (e.type === 'keyup' && e.code !== 'Space') return
+        voando = false
+    }
+
+    window.addEventListener('keydown', ativar)
+    window.addEventListener('keyup', desativar)
+    areaDoJogo.addEventListener('mousedown', ativar)
+    areaDoJogo.addEventListener('mouseup', desativar)
+    areaDoJogo.addEventListener('mouseleave', desativar)
+    areaDoJogo.addEventListener('touchstart', ativar)
+    areaDoJogo.addEventListener('touchend', desativar)
+
+    this.pausar = () => {
+        window.removeEventListener('keydown', ativar)
+        window.removeEventListener('keyup', desativar)
+        areaDoJogo.removeEventListener('mousedown', ativar)
+        areaDoJogo.removeEventListener('mouseup', desativar)
+        areaDoJogo.removeEventListener('mouseleave', desativar)
+        areaDoJogo.removeEventListener('touchstart', ativar)
+        areaDoJogo.removeEventListener('touchend', desativar)
+    }
 
     this.animar = () => {
         const novoY = this.getY() + (voando ? 8 : -5)
@@ -234,6 +259,9 @@ function colidiu(passaro, barreiras){
 
 
 
+const CHAVE_RECORDE = 'flappy-bird-recorde'
+const lerRecorde = () => parseInt(localStorage.getItem(CHAVE_RECORDE)) || 0
+
 function FlappyBird() {
     let pontos = 0
 
@@ -242,15 +270,16 @@ function FlappyBird() {
     const largura = areaDoJogo.clientWidth
 
     const progresso = new Progresso()
+    const recorde = novoElemento('span', 'recorde')
+    recorde.innerHTML = `Recorde: ${lerRecorde()}`
+
     const barreiras = new Barreiras(altura, largura, 300, 400,
         () => progresso.atualizarPonto(++pontos))
-    const passaro = new Passaro(altura)
-    
-   
-    
+    const passaro = new Passaro(altura, areaDoJogo)
 
 
     areaDoJogo.appendChild(progresso.elemento)
+    areaDoJogo.appendChild(recorde)
     areaDoJogo.appendChild(passaro.elemento)
     barreiras.pares.forEach(par => areaDoJogo.appendChild(par.elemento))
 
@@ -262,12 +291,30 @@ function FlappyBird() {
 
             if(colidiu(passaro, barreiras)){
                 clearInterval(temporizador)
+                passaro.pausar()
+
+                const bateuRecorde = pontos > lerRecorde()
+                if (bateuRecorde) localStorage.setItem(CHAVE_RECORDE, pontos)
+
                 const msg = novoElemento('div','msg')
                 const cont = novoElemento('h1','')
+                const pontuacao = novoElemento('p', 'pontuacao')
+                const botaoReiniciar = novoElemento('button', 'reiniciar')
+
+                cont.innerHTML = "Você Perdeu!"
+                pontuacao.innerHTML = bateuRecorde
+                    ? `Novo recorde: ${pontos}!`
+                    : `Pontos: ${pontos} — Recorde: ${lerRecorde()}`
+                botaoReiniciar.innerHTML = 'Jogar novamente'
+                botaoReiniciar.onclick = () => {
+                    areaDoJogo.innerHTML = ''
+                    new FlappyBird().start()
+                }
+
                 msg.appendChild(cont)
-                
-                cont.innerHTML = "Você Perdeu!"    
-                
+                msg.appendChild(pontuacao)
+                msg.appendChild(botaoReiniciar)
+
                 areaDoJogo.appendChild(msg)
             }
 

@@ -41,6 +41,8 @@ width: 1200px;
 margin: 15px;
 background-color: deepskyblue;
 overflow: hidden;
+cursor: pointer;
+user-select: none;
 }
 
 
@@ -104,13 +106,23 @@ overflow: hidden;
     z-index: 10;
 }
 
-.msg{
+.recorde{
+    position: absolute;
+    top: 95px;
+    right: 10px;
+    font-family: Pixel;
+    font-size: 24px;
+    z-index: 10;
+    text-shadow: 2px 2px #000;
+}
 
+.msg{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100%;
-    
+    gap: 20px;
 }
 
 .msg h1{
@@ -118,5 +130,29 @@ overflow: hidden;
     font-weight: 900;
     z-index: 10;
     text-shadow: 4px 4px #000;
-    
+    margin: 0;
+}
+
+.msg .pontuacao{
+    font-size: 28px;
+    z-index: 10;
+    text-shadow: 2px 2px #000;
+    margin: 0;
+}
+
+.msg .reiniciar{
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 12px 28px;
+    border: 2px solid #000;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #639301, #A5E82E);
+    color: #0D262D;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.msg .reiniciar:hover{
+    filter: brightness(1.1);
 }
